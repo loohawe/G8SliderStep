@@ -41,6 +41,10 @@ class G8SliderStep: UISlider {
     @IBInspectable var unselectedFont: UIFont = UIFont.systemFont(ofSize: 13)
     @IBInspectable var selectedFont: UIFont = UIFont.systemFont(ofSize: 13)
     @IBInspectable var stepTitlesOffset: CGFloat = 1
+    @IBInspectable var leftSectionStrokeWidth: Float = 5
+    @IBInspectable var leftSectionStrokeColor: UIColor = UIColor.red
+    
+    let leftSectionLayer: CAShapeLayer = CAShapeLayer()
     
     var customTrack: Bool = true
     
@@ -132,6 +136,8 @@ class G8SliderStep: UISlider {
             self.setThumbImage(selectionImage, for: UIControlState.selected)
             self.setThumbImage(selectionImage, for: UIControlState.highlighted)
         }
+        
+        updateLeftStroke()
     }
     
     internal func thumbForSliderValue(_ value: Float) -> UIImage? {
@@ -190,6 +196,7 @@ class G8SliderStep: UISlider {
         setThumbForSliderValue(self.value)
         drawLabels()
         drawTrack()
+        updateLeftStroke()
         drawImages()
     }
     
@@ -342,6 +349,24 @@ class G8SliderStep: UISlider {
         }
         
         ctx?.restoreGState()
+    }
+    
+    internal func updateLeftStroke() {
+        
+        if leftSectionLayer.superlayer == nil {
+            leftSectionLayer.fillColor = leftSectionStrokeColor.cgColor
+            self.layer.addSublayer(leftSectionLayer)
+        }
+        
+        if customTrack {
+            let x = trackLeftOffset
+            let y = bounds.midY - CGFloat(leftSectionStrokeWidth / 2)
+            let rect = CGRect(x: x, y: y,
+                              width: (bounds.width - trackLeftOffset - trackRightOffset) * CGFloat(((value-minimumValue)/(maximumValue-minimumValue))),
+                              height: CGFloat(leftSectionStrokeWidth))
+            let trackPath = UIBezierPath(rect: rect)
+            leftSectionLayer.path = trackPath.cgPath
+        }
     }
     
     //Avoid exc bad access on viewcontroller view did load
